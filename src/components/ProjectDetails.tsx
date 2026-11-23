@@ -3,9 +3,10 @@ import type { IProject } from "../models/Project";
 
 interface ProjectDetailsProps {
   projects: IProject[];
+  onDelete: (id: string) => void;
 }
 
-export default function ProjectDetails({ projects }: ProjectDetailsProps) {
+export default function ProjectDetails({ projects, onDelete }: ProjectDetailsProps) {
   const { id } = useParams();
   const project = projects.find((project) => project.id === id);
 
@@ -34,6 +35,13 @@ export default function ProjectDetails({ projects }: ProjectDetailsProps) {
         <p>Start date: {project.startDate}</p>
         <p>{project.dueDate ? `Due date: ${project.dueDate}` : "No due date"}</p>
       </div>
+
+      <button
+        type="button"
+        onClick={() => onDelete(project.id)}
+        className="mt-6 rounded-md border border-red-600 px-4 py-2 font-medium text-red-600 hover:bg-red-50">
+        Delete project
+      </button>
     </section>
   );
 }

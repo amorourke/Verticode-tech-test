@@ -16,6 +16,17 @@ export default function App() {
     navigate(`/projects/${project.id}`);
   }
 
+  function handleDeleteProject(id: string) {
+    if (!window.confirm("Delete this project? This can't be undone.")) {
+      return;
+    }
+
+    setProjects((prevProjects) =>
+      prevProjects.filter((project) => project.id !== id)
+    );
+    navigate("/");
+  }
+
   return (
     <main className="flex flex-col">
       <header className="flex h-24 bg-light-green">
@@ -26,7 +37,7 @@ export default function App() {
         <Route path="/" element={<ProjectList projects={projects} />} />
         <Route path="/projects" element={<ProjectList projects={projects} />} />
         <Route path="/projects/new" element={<ProjectForm onSubmit={handleCreateProject} />} />
-        <Route path="/projects/:id" element={<ProjectDetails projects={projects} />} />
+        <Route path="/projects/:id" element={<ProjectDetails projects={projects} onDelete={handleDeleteProject} />} />
       </Routes>
     </main>
   );
