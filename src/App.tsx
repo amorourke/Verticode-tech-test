@@ -4,9 +4,10 @@ import type { IProject, NewProject } from "./models/Project";
 import ProjectForm from "./components/ProjectForm";
 import ProjectList from "./components/ProjectList";
 import ProjectDetails from "./components/ProjectDetails";
+import { mockProjects } from "./data/mockProjects";
 
 export default function App() {
-  const [projects, setProjects] = useState<IProject[]>([]);
+  const [projects, setProjects] = useState<IProject[]>(mockProjects);
   const navigate = useNavigate();
 
   function handleCreateProject(newProject: NewProject) {
