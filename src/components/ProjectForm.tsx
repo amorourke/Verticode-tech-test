@@ -1,139 +1,80 @@
-import { useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
+import { useState, type FormEvent } from "react";
 import { ProjectStatus, type NewProject } from "../models/Project";
 import { validateProject, type ProjectFormErrors } from "../utils/validateProject";
 
-const INITIAL_VALUES: NewProject = {
-  name: "",
-  description: "",
-  startDate: "",
-  dueDate: "",
-  status: ProjectStatus.NotStarted,
-};
-
-const INPUT_CLASSES = "w-full rounded-md border px-3 py-2";
-
-type FormField = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
-
-interface FieldProps {
-  id: keyof NewProject;
-  label: string;
-  error?: string;
-  required?: boolean;
-  children: ReactNode; 
-}
-
-function Field({ id, label, error, required, children }: FieldProps) {
-  return (
-    <div>
-      <label htmlFor={id} className="mb-1 block text-sm font-medium">
-        {label}
-        {required && <span className="text-red-600"> *</span>}
-      </label>
-      {children}
-      {error && (
-        <p id={`${id}-error`} className="mt-1 text-sm text-red-600">
-          {error}
-        </p>
-      )}
-    </div>
-  );
-}
+const LABEL = "mb-1 block text-sm font-medium";
+const INPUT = "w-full rounded-md border border-gray-300 px-3 py-2";
+const ERROR = "mt-1 text-sm text-red-600";
 
 interface ProjectFormProps {
   onSubmit: (project: NewProject) => void;
 }
 
 export default function ProjectForm({ onSubmit }: ProjectFormProps) {
-  const [values, setValues] = useState(INITIAL_VALUES);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  const [status, setStatus] = useState<ProjectStatus>(ProjectStatus.NotStarted);
   const [errors, setErrors] = useState<ProjectFormErrors>({});
-
-  function handleChange(event: ChangeEvent<FormField>) {
-    const { name, value } = event.target;
-    setValues((current) => ({ ...current, [name]: value }));
-    setErrors((current) => ({ ...current, [name]: undefined }));
-  }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const validationErrors = validateProject(values);
-    setErrors(validationErrors);
-
-    if (Object.keys(validationErrors).length > 0) {
-      return;
-    }
-
-    onSubmit({
-      ...values,
-      name: values.name.trim(),
-      description: values.description.trim(),
-      dueDate: values.dueDate || undefined,
-    });
-  }
-
-  function fieldProps(field: keyof NewProject) {
-    const error = errors[field];
-
-    return {
-      id: field,
-      name: field,
-      value: values[field],
-      onChange: handleChange,
-      "aria-invalid": Boolean(error),
-      "aria-describedby": error ? `${field}-error` : undefined,
-      className: `${INPUT_CLASSES} ${
-        error ? "border-red-500" : "border-gray-300"
-      }`,
+    const project: NewProject = {
+      name: name.trim(),
+      description: description.trim(),
+      startDate,
+      dueDate: dueDate || undefined,
+      status,
     };
+
+    const newErrors = validateProject(project);
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length === 0) {
+      onSubmit(project);
+    }
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="mx-auto flex w-full max-w-xl flex-col gap-4 p-6"
-    >
-      <Field id="name" label="Project name" error={errors.name} required>
-        <input type="text" {...fieldProps("name")} />
-      </Field>
-
-      <Field
-        id="description"
-        label="Description"
-        error={errors.description}
-        required
-      >
-        <textarea rows={4} {...fieldProps("description")} />
-      </Field>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field
-          id="startDate"
-          label="Start date"
-          error={errors.startDate}
-          required
-        >
-          <input type="date" {...fieldProps("startDate")} />
-        </Field>
-
-        <Field id="dueDate" label="Due date" error={errors.dueDate}>
-          <input type="date" {...fieldProps("dueDate")} />
-        </Field>
+    <form onSubmit={handleSubmit} className="mx-auto flex w-full max-w-xl flex-col gap-4 p-6">
+      <div>
+        <label htmlFor="name" className={LABEL}>Project name *</label>
+        <input id="name" className={INPUT} value={name} onChange={(e) => setName(e.target.value)} />
+        {errors.name && <p className={ERROR}>{errors.name}</p>}
       </div>
 
-      <Field id="status" label="Status" error={errors.status}>
-        <select {...fieldProps("status")}>
-          {Object.values(ProjectStatus).map((status) => (
-            <option key={status} value={status}>
-              {status}
-            </option>
+      <div>
+        <label htmlFor="description" className={LABEL}>Description *</label>
+        <textarea id="description" rows={4} className={INPUT} value={description} onChange={(e) => setDescription(e.target.value)} />
+        {errors.description && <p className={ERROR}>{errors.description}</p>}
+      </div>
+
+    <div className="grid gap-4 sm:grid-cols-2">
+    <div>
+        <label htmlFor="startDate" className={LABEL}>Start date *</label>
+        <input id="startDate" type="date" className={INPUT} value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+        {errors.startDate && <p className={ERROR}>{errors.startDate}</p>}
+    </div>
+
+    <div>
+        <label htmlFor="dueDate" className={LABEL}>Due date</label>
+        <input id="dueDate" type="date" className={INPUT} value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+        {errors.dueDate && <p className={ERROR}>{errors.dueDate}</p>}
+    </div>
+    </div>
+
+      <div>
+        <label htmlFor="status" className={LABEL}>Status</label>
+        <select id="status" className={INPUT} value={status} onChange={(e) => setStatus(e.target.value as ProjectStatus)}>
+          {Object.values(ProjectStatus).map((option) => (
+            <option key={option} value={option}>{option}</option>
           ))}
         </select>
-      </Field>
+      </div>
 
-      <button
-        type="submit"
-        className="rounded-md bg-green px-4 py-2 font-medium text-white"
-      >
+      <button type="submit" className="rounded-md bg-green px-4 py-2 font-medium text-white">
         Create project
       </button>
     </form>
