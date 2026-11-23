@@ -6,6 +6,8 @@ export interface IProject {
   status: ProjectStatus;
 }
 
+export type ProjectFormValues = Required<IProject>;
+
 export enum ProjectStatus {
   NotStarted = "Not started",
   InProgress = "In progress",
