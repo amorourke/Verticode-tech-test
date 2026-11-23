@@ -32,7 +32,7 @@ export default function ProjectDetails({ projects }: ProjectDetailsProps) {
       <div className="mt-4 flex flex-col gap-1 text-sm text-gray-600">
         <p>Status: {project.status}</p>
         <p>Start date: {project.startDate}</p>
-        <p>Due date: {project.dueDate ?? "No due date"}</p>
+        <p>{project.dueDate ? `Due date: ${project.dueDate}` : "No due date"}</p>
       </div>
     </section>
   );
