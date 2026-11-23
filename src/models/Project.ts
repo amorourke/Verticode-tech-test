@@ -1,4 +1,5 @@
 export interface IProject {
+  id: string;  
   name: string;
   description: string;
   startDate: string;
@@ -6,7 +7,7 @@ export interface IProject {
   status: ProjectStatus;
 }
 
-export type ProjectFormValues = Required<IProject>;
+export type NewProject = Omit<IProject, "id">;
 
 export enum ProjectStatus {
   NotStarted = "Not started",

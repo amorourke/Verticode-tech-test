@@ -1,10 +1,10 @@
-import type { ProjectFormValues } from "../models/Project";
+import type { NewProject } from "../models/Project";
 
 export type ProjectFormErrors = Partial<
-  Record<keyof ProjectFormValues, string>
+  Record<keyof NewProject, string>
 >;
 
-export function validateProject(values: ProjectFormValues): ProjectFormErrors {
+export function validateProject(values: NewProject): ProjectFormErrors {
   const errors: ProjectFormErrors = {};
 
   if (!values.name.trim()) {

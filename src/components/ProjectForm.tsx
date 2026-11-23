@@ -1,8 +1,8 @@
 import { useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
-import { ProjectStatus, type ProjectFormValues } from "../models/Project";
+import { ProjectStatus, type NewProject } from "../models/Project";
 import { validateProject, type ProjectFormErrors } from "../utils/validateProject";
 
-const INITIAL_VALUES: ProjectFormValues = {
+const INITIAL_VALUES: NewProject = {
   name: "",
   description: "",
   startDate: "",
@@ -15,11 +15,11 @@ const INPUT_CLASSES = "w-full rounded-md border px-3 py-2";
 type FormField = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
 
 interface FieldProps {
-  id: keyof ProjectFormValues;
+  id: keyof NewProject;
   label: string;
   error?: string;
   required?: boolean;
-  children: ReactNode; // input or textarea or select
+  children: ReactNode; 
 }
 
 function Field({ id, label, error, required, children }: FieldProps) {
@@ -39,7 +39,11 @@ function Field({ id, label, error, required, children }: FieldProps) {
   );
 }
 
-export default function ProjectForm() {
+interface ProjectFormProps {
+  onSubmit: (project: NewProject) => void;
+}
+
+export default function ProjectForm({ onSubmit }: ProjectFormProps) {
   const [values, setValues] = useState(INITIAL_VALUES);
   const [errors, setErrors] = useState<ProjectFormErrors>({});
 
@@ -51,10 +55,23 @@ export default function ProjectForm() {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setErrors(validateProject(values));
+
+    const validationErrors = validateProject(values);
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length > 0) {
+      return;
+    }
+
+    onSubmit({
+      ...values,
+      name: values.name.trim(),
+      description: values.description.trim(),
+      dueDate: values.dueDate || undefined,
+    });
   }
 
-  function fieldProps(field: keyof ProjectFormValues) {
+  function fieldProps(field: keyof NewProject) {
     const error = errors[field];
 
     return {
