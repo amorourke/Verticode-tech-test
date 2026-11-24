@@ -11,6 +11,7 @@ import { DUE_DATE_TONE_STYLES, getDueDateLabel } from "../utils/getDueDateLabel"
 import { STATUS_DISPLAY_ORDER, sortProjects } from "../utils/sortProjects";
 import { formatDate } from "../utils/formatDate";
 import { OVERDUE_BORDER, STATUS_STYLES } from "../styles/statusStyles";
+import { getTaskProgress } from "../utils/tasks";
 
 const LABEL = "mb-1 block text-xs font-medium";
 const SELECT = "w-full rounded-md border border-gray-300 px-2.5 py-1.5 text-sm";
@@ -141,6 +142,8 @@ export default function ProjectList({ projects }: ProjectListProps) {
                   const dueDateLabel = getDueDateLabel(project);
                   const styles = STATUS_STYLES[project.status];
                   const isOverdue = dueDateLabel?.tone === "overdue";
+                  const progress = getTaskProgress(project.tasks);
+
                   return (
                     <li key={project.id}>
                       <Link
@@ -148,8 +151,22 @@ export default function ProjectList({ projects }: ProjectListProps) {
                         className={`flex h-full flex-col rounded-3xl border p-6 shadow-sm transition-all duration-200 hover:scale-[1.03] hover:shadow-xl ${styles.card} ${styles.cardHover} ${
                           isOverdue ? OVERDUE_BORDER : styles.border
                         }`}>
+
                         <span className="line-clamp-2 text-lg font-bold text-gray-900">{project.name}</span>
                         <span className="mt-2 line-clamp-2 text-sm text-gray-600">{project.description}</span>
+
+                        {progress && (
+                          <span className="mt-4 flex items-center gap-2">
+                            <span className="h-1.5 flex-1 rounded-full bg-black/10">
+                              <span
+                                className="block h-full rounded-full bg-green-500"
+                                style={{ width: `${progress.percent}%` }}
+                              />
+                            </span>
+                            <span className="text-xs text-gray-500">{progress.done}/{progress.total}</span>
+                          </span>
+                        )}
+
                         <span className="mt-auto flex items-end justify-between gap-3 pt-4">
                           <span className="text-xs text-gray-500">
                             {project.dueDate ? `Due ${formatDate(project.dueDate, "short")}` : "No due date"}

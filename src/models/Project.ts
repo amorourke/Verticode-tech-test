@@ -1,3 +1,9 @@
+export interface ITask {
+  id: string;
+  name: string;
+  completed: boolean;
+}
+
 export interface IProject {
   id: string;  
   name: string;
@@ -5,6 +11,7 @@ export interface IProject {
   startDate: string;
   dueDate?: string;
   status: ProjectStatus;
+  tasks?: ITask[];
 }
 
 export type NewProject = Omit<IProject, "id">;

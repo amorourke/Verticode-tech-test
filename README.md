@@ -88,6 +88,16 @@ These criteria are designed to reflect our company's everyday work style.
   - Selected status tiles use `aria-pressed`.
   - Keyboard users get a visible green focus ring (`focus-visible`).
 
+
+  ### Stretch goal: project tasks
+
+- Projects can have an optional checklist of tasks. Tasks can be added, ticked off and deleted on the details page.
+- A progress bar shows how many tasks are done, on both the details page and the list cards.
+- **Tasks are optional** (`tasks?: ITask[]`), so existing projects work unchanged. Projects without tasks show no bar.
+- **Edits keep tasks.** `ProjectForm` passes `initialValues.tasks` through, so saving a project edit can't wipe its tasks.
+- **Task logic lives in pure utils** (`src/utils/tasks.ts`): create, toggle, remove and progress all return new arrays without modifying the original.
+- **Status stays manual.** Completing every task doesn't change the project's status, so the user stays in control and Undo still makes sense.
+
 ### Validation
 
 `validateProject` checks that:
@@ -125,3 +135,7 @@ Errors appear under each field. The same validation runs when creating and when 
 | ![Filters before](public/ui_screenshots/filters%20before.png) | ![List page after](public/ui_screenshots/list%20page%20after%20ui%20branch.png) |
 | ![Details before](public/ui_screenshots/details%20before.png) | ![Details after](public/ui_screenshots/details%20after.png) |
 
+
+### Notes
+
+Id generation is inconsistent with created projects and mock projects. Created in app with Date.now().toString(). Task ids are also marked as 1-1, 1-2 but are generated with crypto.randomUUID()

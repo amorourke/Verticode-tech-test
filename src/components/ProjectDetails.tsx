@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ProjectStatus, type IProject } from "../models/Project";
+import { ProjectStatus, type IProject, type ITask } from "../models/Project";
 import ProjectForm from "./ProjectForm";
 import { formatDate } from "../utils/formatDate";
 import { DUE_DATE_TONE_STYLES, getDueDateLabel } from "../utils/getDueDateLabel";
+import { createTask, getTaskProgress, removeTask, toggleTask } from "../utils/tasks";
 import { OVERDUE_BORDER, STATUS_STYLES } from "../styles/statusStyles";
+
+
+
 
 const PILL = "rounded-full px-3 py-1 text-sm font-medium";
 const CARD_LAYOUT = "mt-4 rounded-xl border p-6 shadow-sm sm:p-8";
@@ -25,6 +29,7 @@ export default function ProjectDetails({ projects, onDelete, onUpdate }: Project
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [justCompletedId, setJustCompletedId] = useState<string | null>(null);
+  const [newTaskTitle, setNewTaskTitle] = useState("");
 
   if (!project) {
     return (
@@ -51,6 +56,20 @@ export default function ProjectDetails({ projects, onDelete, onUpdate }: Project
   function undoComplete() {
     onUpdate({ ...project!, status: ProjectStatus.InProgress });
     setJustCompletedId(null);
+  }
+
+  const tasks = project.tasks ?? [];
+  const progress = getTaskProgress(tasks);
+
+  function updateTasks(updatedTasks: ITask[]) {
+    onUpdate({ ...project!, tasks: updatedTasks });
+  }
+
+  function handleAddTask(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!newTaskTitle.trim()) return;
+    updateTasks([...tasks, createTask(newTaskTitle)]);
+    setNewTaskTitle("");
   }
 
   return (
@@ -97,6 +116,64 @@ export default function ProjectDetails({ projects, onDelete, onUpdate }: Project
               </span>
             )}
           </div>
+
+          <div className="mt-8 border-t border-gray-200 pt-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xs font-medium uppercase tracking-wide text-gray-500">Tasks</h2>
+            {progress && <span className="text-sm text-gray-600">{progress.done} of {progress.total} done</span>}
+          </div>
+
+          {progress && (
+            <div
+              role="progressbar"
+              aria-label="Task progress"
+              aria-valuenow={progress.percent}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              className="mt-3 h-2 rounded-full bg-black/10">
+              <div
+                className="h-full rounded-full bg-green-500 transition-[width] duration-300"
+                style={{ width: `${progress.percent}%` }}
+              />
+            </div>
+          )}
+
+          <ul className="mt-4 flex flex-col gap-2">
+            {tasks.map((task) => (
+              <li key={task.id} className="flex items-center justify-between gap-3">
+                <label className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={task.completed}
+                    onChange={() => updateTasks(toggleTask(tasks, task.id))}
+                    className="h-4 w-4 accent-green-500"
+                  />
+                  <span className={task.completed ? "text-gray-400 line-through" : "text-gray-800"}>{task.name}</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => updateTasks(removeTask(tasks, task.id))}
+                  aria-label={`Delete task ${task.name}`}
+                  className="text-sm text-gray-400 hover:text-red-600">
+                  ✕
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          <form onSubmit={handleAddTask} className="mt-4 flex gap-2">
+            <input
+              value={newTaskTitle}
+              onChange={(e) => setNewTaskTitle(e.target.value)}
+              placeholder="Add a task"
+              aria-label="New task"
+              className="flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
+            />
+            <button type="submit" className="rounded-md bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-600">
+              Add
+            </button>
+          </form>
+        </div>
 
           <dl className="mt-8 grid gap-6 border-t border-gray-200 pt-6 sm:grid-cols-2">
             <div>

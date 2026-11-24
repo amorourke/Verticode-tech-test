@@ -17,11 +17,11 @@ export const STATUS_STYLES: Record<ProjectStatus, StatusStyle> = {
     dot: "bg-gray-400",
   },
   [ProjectStatus.InProgress]: {
-    card: "bg-yellow-50",
-    cardHover: "hover:bg-yellow-100",
-    border: "border-yellow-200",
-    badge: "bg-yellow-100 text-yellow-800",
-    dot: "bg-yellow-500",
+    card: "bg-blue-50",
+    cardHover: "hover:bg-blue-100",
+    border: "border-blue-200",
+    badge: "bg-blue-100 text-blue-800",
+    dot: "bg-blue-500",
   },
   [ProjectStatus.Complete]: {
     card: "bg-light-green-400/50",
