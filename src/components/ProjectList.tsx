@@ -143,14 +143,15 @@ export default function ProjectList({ projects }: ProjectListProps) {
                             {project.dueDate ? `Due ${formatDate(project.dueDate, "short")}` : "No due date"}
                           </span>
                           <span className="flex flex-wrap justify-end gap-2">
+                            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${styles.badge}`}>
+                              {project.status}
+                            </span>
                             {dueDateLabel && (
                               <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${DUE_DATE_TONE_STYLES[dueDateLabel.tone]}`}>
                                 {dueDateLabel.text}
                               </span>
                             )}
-                            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${styles.badge}`}>
-                              {project.status}
-                            </span>
+                            
                           </span>
                         </span>
                       </Link>
