@@ -5,5 +5,13 @@
 @layer base {
   body {
     @apply font-manrope;
+    @apply bg-gray-50;
+  }
+  a,
+  button,
+  input,
+  select,
+  textarea {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-2;
   }
 }
