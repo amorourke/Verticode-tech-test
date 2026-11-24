@@ -7,6 +7,7 @@ import {
   type ProjectFilters,
   type StatusFilter,
 } from "../utils/filterProjects";
+import { DUE_DATE_TONE_STYLES, getDueDateLabel } from "../utils/getDueDateLabel";
 
 const LABEL = "mb-1 block text-xs font-medium";
 const SELECT = "w-full rounded-md border border-gray-300 px-2.5 py-1.5 text-sm";
@@ -102,14 +103,24 @@ export default function ProjectList({ projects }: ProjectListProps) {
 
       {visibleProjects.length > 0 ? (
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {visibleProjects.map((project) => (
-            <li key={project.id}>
-              <Link to={`/projects/${project.id}`} className="block h-full rounded-md border border-gray-300 p-4 hover:bg-light-green-400">
-                <span className="block font-medium">{project.name}</span>
-                <span className="block text-sm text-gray-600">{project.status}</span>
-              </Link>
-            </li>
-          ))}
+          {visibleProjects.map((project) => {
+            const dueDateLabel = getDueDateLabel(project);
+            return (
+              <li key={project.id}>
+                <Link to={`/projects/${project.id}`} className="block h-full rounded-md border border-gray-300 p-4 hover:bg-light-green-400">
+                  <span className="block font-medium">{project.name}</span>
+                  <span className="mt-2 flex flex-wrap items-center gap-2">
+                    <span className="text-sm text-gray-600">{project.status}</span>
+                    {dueDateLabel && (
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${DUE_DATE_TONE_STYLES[dueDateLabel.tone]}`}>
+                        {dueDateLabel.text}
+                      </span>
+                    )}
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       ) : (
         <div className="rounded-md border border-dashed border-gray-300 p-6 text-center text-gray-600">
