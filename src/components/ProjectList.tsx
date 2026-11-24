@@ -102,14 +102,26 @@ export default function ProjectList({ projects }: ProjectListProps) {
 
           <div className="sm:w-52">
             <label htmlFor="search" className={LABEL}>Search</label>
-            <input
-              id="search"
-              type="search"
-              placeholder="Search by project name"
-              className={SELECT}
-              value={filters.search}
-              onChange={(e) => updateFilter("search", e.target.value)}
-            />
+            <div className="relative">
+              <svg //magnifying glass icon
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+                aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+              </svg>
+              <input
+                id="search"
+                type="search"
+                placeholder="Search by project name"
+                className={`${SELECT} pl-8`}
+                value={filters.search}
+                onChange={(e) => updateFilter("search", e.target.value)}
+              />
+            </div>
           </div>
         </div>
       </div>
