@@ -30,10 +30,8 @@ export function getDueDateLabel(project: IProject, today: Date = new Date()): Du
   return { text: `Due in ${describeDuration(days)}`, tone: days <= 7 ? "soon" : "later" };
 }
 
-/** Whole calendar days from `from` to `to`, ignoring the time of day. */
 function daysBetween(from: Date, to: Date): number {
   const start = new Date(from.getFullYear(), from.getMonth(), from.getDate());
-  // Math.round absorbs the hour gained or lost when clocks change
   return Math.round((to.getTime() - start.getTime()) / MS_PER_DAY);
 }
 

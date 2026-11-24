@@ -107,9 +107,10 @@ export default function ProjectList({ projects }: ProjectListProps) {
             const dueDateLabel = getDueDateLabel(project);
             return (
               <li key={project.id}>
-                <Link to={`/projects/${project.id}`} className="block h-full rounded-md border border-gray-300 p-4 hover:bg-light-green-400">
+                <Link to={`/projects/${project.id}`} className="flex h-full flex-col rounded-md border border-gray-300 p-4 hover:bg-light-green-400">
                   <span className="block font-medium">{project.name}</span>
-                  <span className="mt-2 flex flex-wrap items-center gap-2">
+                  <span className="mt-1 line-clamp-2 text-sm text-gray-600">{project.description}</span>
+                  <span className="mt-auto flex flex-wrap items-center gap-2 pt-3">
                     <span className="text-sm text-gray-600">{project.status}</span>
                     {dueDateLabel && (
                       <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${DUE_DATE_TONE_STYLES[dueDateLabel.tone]}`}>
