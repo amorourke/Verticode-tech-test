@@ -1,5 +1,5 @@
 import { Link, useSearchParams } from "react-router-dom";
-import { ProjectStatus, type IProject } from "../models/Project";
+import type { IProject } from "../models/Project";
 import {
   DUE_DATE_FILTER_LABELS,
   filterProjects,
@@ -34,7 +34,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
 
   const statusCounts: { value: StatusFilter; label: string; count: number }[] = [
     { value: "all", label: "All projects", count: projects.length },
-    ...Object.values(ProjectStatus).map((status) => ({
+    ...STATUS_DISPLAY_ORDER.map((status) => ({
       value: status,
       label: status,
       count: projects.filter((project) => project.status === status).length,
@@ -62,7 +62,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
         </div>
         <Link
           to="/projects/new"
-          className="group flex items-center gap-2 rounded-lg bg-gradient-to-r from-green-400 to-green px-5 py-3 font-semibold text-white shadow-sm transition-all duration-200 hover:scale-[1.03] hover:shadow-xl">
+          className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-green-400 to-green px-5 py-3 font-semibold text-white shadow-sm transition-all duration-200 hover:scale-[1.03] hover:shadow-xl">
           + New project
         </Link>
       </div>
@@ -78,10 +78,10 @@ export default function ProjectList({ projects }: ProjectListProps) {
                 aria-pressed={isActive}
                 onClick={() => updateFilter("status", value)}
                 className={`flex aspect-square w-28 flex-col justify-center rounded-md p-2.5 text-left ${
-                  isActive ? "bg-light-green-400/60" : "hover:bg-gray-50"
+                  isActive ? "bg-light-green-400/60" : "hover:bg-gray-100"
                 }`}>
-                <span className="block text-3xl font-bold text-green">{count}</span>
-                <span className="block text-xs text-gray-600">{label}</span>
+                <span className="text-3xl font-bold text-green">{count}</span>
+                <span className="text-xs text-gray-600">{label}</span>
               </button>
             );
           })}
@@ -151,7 +151,6 @@ export default function ProjectList({ projects }: ProjectListProps) {
                         className={`flex h-full flex-col rounded-3xl border p-6 shadow-sm transition-all duration-200 hover:scale-[1.03] hover:shadow-xl ${styles.card} ${styles.cardHover} ${
                           isOverdue ? OVERDUE_BORDER : styles.border
                         }`}>
-
                         <span className="line-clamp-2 text-lg font-bold text-gray-900">{project.name}</span>
                         <span className="mt-2 line-clamp-2 text-sm text-gray-600">{project.description}</span>
 
@@ -180,7 +179,6 @@ export default function ProjectList({ projects }: ProjectListProps) {
                                 {dueDateLabel.text}
                               </span>
                             )}
-                            
                           </span>
                         </span>
                       </Link>

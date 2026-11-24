@@ -7,9 +7,6 @@ import { DUE_DATE_TONE_STYLES, getDueDateLabel } from "../utils/getDueDateLabel"
 import { createTask, getTaskProgress, removeTask, toggleTask } from "../utils/tasks";
 import { OVERDUE_BORDER, STATUS_STYLES } from "../styles/statusStyles";
 
-
-
-
 const PILL = "rounded-full px-3 py-1 text-sm font-medium";
 const CARD_LAYOUT = "mt-4 rounded-xl border p-6 shadow-sm sm:p-8";
 const WHITE_CARD = `${CARD_LAYOUT} border-gray-200 bg-white`;
