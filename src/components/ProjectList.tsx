@@ -10,35 +10,10 @@ import {
 import { DUE_DATE_TONE_STYLES, getDueDateLabel } from "../utils/getDueDateLabel";
 import { STATUS_DISPLAY_ORDER, sortProjects } from "../utils/sortProjects";
 import { formatDate } from "../utils/formatDate";
+import { OVERDUE_BORDER, STATUS_STYLES } from "../styles/statusStyles";
 
 const LABEL = "mb-1 block text-xs font-medium";
 const SELECT = "w-full rounded-md border border-gray-300 px-2.5 py-1.5 text-sm";
-
-const STATUS_CARD_STYLES: Record<
-  ProjectStatus,
-  { background: string; border: string; badge: string; dot: string }
-> = {
-  [ProjectStatus.NotStarted]: {
-    background: "bg-gray-50 hover:bg-gray-100",
-    border: "border-gray-200",
-    badge: "bg-gray-200 text-gray-700",
-    dot: "bg-gray-400",
-  },
-  [ProjectStatus.InProgress]: {
-    background: "bg-blue-50 hover:bg-blue-100",
-    border: "border-blue-200",
-    badge: "bg-blue-100 text-blue-800",
-    dot: "bg-blue-500",
-  },
-  [ProjectStatus.Complete]: {
-    background: "bg-light-green-400/50 hover:bg-light-green-400",
-    border: "border-light-green-600",
-    badge: "bg-light-green text-green",
-    dot: "bg-green-400",
-  },
-};
-
-const OVERDUE_BORDER = "border-red-400 ring-2 ring-red-100";
 
 interface ProjectListProps {
   projects: IProject[];
@@ -49,7 +24,6 @@ export default function ProjectList({ projects }: ProjectListProps) {
   const filters = parseProjectFilters(searchParams);
   const visibleProjects = sortProjects(filterProjects(projects, filters));
 
-  // One section per status, skipping empty ones. visibleProjects is already sorted by due date.
   const sections = STATUS_DISPLAY_ORDER.map((status) => ({
     status,
     projects: visibleProjects.filter((project) => project.status === status),
@@ -143,7 +117,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
           {sections.map((section) => (
             <section key={section.status}>
               <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-gray-900">
-                <span className={`h-2.5 w-2.5 rounded-full ${STATUS_CARD_STYLES[section.status].dot}`} />
+                <span className={`h-2.5 w-2.5 rounded-full ${STATUS_STYLES[section.status].dot}`} />
                 {section.status}
                 <span className="text-sm font-medium text-gray-500">{section.projects.length}</span>
               </h2>
@@ -151,13 +125,13 @@ export default function ProjectList({ projects }: ProjectListProps) {
               <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {section.projects.map((project) => {
                   const dueDateLabel = getDueDateLabel(project);
-                  const styles = STATUS_CARD_STYLES[project.status];
+                  const styles = STATUS_STYLES[project.status];
                   const isOverdue = dueDateLabel?.tone === "overdue";
                   return (
                     <li key={project.id}>
                       <Link
                         to={`/projects/${project.id}`}
-                        className={`flex h-full flex-col rounded-xl border p-6 transition-colors ${styles.background} ${
+                        className={`flex h-full flex-col rounded-xl border p-6 transition-colors ${styles.card} ${styles.cardHover} ${
                           isOverdue ? OVERDUE_BORDER : styles.border
                         }`}>
                         <span className="line-clamp-2 text-lg font-bold text-gray-900">{project.name}</span>
