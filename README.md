@@ -62,71 +62,40 @@ These criteria are designed to reflect our company's everyday work style.
 
 ### Features
 
-- **Create a project.** The form has a name, description, start date, optional due date and a status select. On submit, the form is replaced by the new project's details page. Cancel returns to the list.
-- **Project list.**
-  - Projects are grouped into sections: **In progress**, **Not started**, then **Complete**. Each section has a coloured heading and a count, and empty sections are hidden.
-  - Within each section, projects are sorted by due date, most urgent first. Projects without a due date go last.
-  - Each card shows the name, a two-line description, the due date ("Due 21 Dec 2026"), a status pill and a due date pill.
+- **Create, edit and delete projects.** One shared form for create and edit, with validation. Delete asks for confirmation.
+- **Project list**
+  - Grouped into **In progress**, **Not started** and **Complete**, each sorted by due date.
   - Cards are colour-coded by status, and overdue cards have a red border.
-- **Status tiles.** Tiles at the top show the number of projects in each status. Clicking a tile filters the list to that status.
-- **Search and due date filter.** Search matches project names, ignoring case. The due date filter offers overdue, due in the next 7 or 30 days, and no due date.
-- **Filters are kept in the URL** (e.g. `?status=In+progress&dueDate=overdue`), so they survive opening a project and pressing back, and a filtered view can be shared as a link.
-- **Due date pills.** These show "Due in 5 days", "Due tomorrow", "Due today" or "4 days overdue", coloured grey, amber or red by urgency. Completed projects and projects without a due date show no pill.
-- **Project details.**
-  - The card takes its status colour.
-  - Dates are formatted for reading (e.g. "24 November 2026").
-  - Edit and delete are icon buttons.
-- **Edit a project.** The edit button swaps the details for the same form, pre-filled, with Save and Cancel. Cancel throws away the changes.
-- **Status actions.**
-  - Not-started projects have a **Start project** button.
-  - In-progress projects have **Mark as complete** (the bonus task). It shows an animated confirmation and an **Undo** button.
-- **Delete a project.** Asks for confirmation first, then returns to the list.
-- **Mock data.** Twelve sample projects cover every case: overdue, due today, due tomorrow, due soon, due in months, complete, and no due date.
-- **Accessibility.**
-  - Every input has a label.
-  - Icon buttons have `aria-label`s.
-  - Selected status tiles use `aria-pressed`.
-  - Keyboard users get a visible green focus ring (`focus-visible`).
+  - Each section shows 3 cards, with a faded preview of the rest and a **Show all** button.
+- **Filtering:** status count tiles, name search and a due date filter, all kept in the URL.
+- **Due date pills:** "Due in 5 days", "Due today", "4 days overdue" and so on, coloured by urgency.
+- **Project details:** status-coloured card, readable dates, and icon buttons for edit and delete.
+- **Status actions:** **Start project**, and **Mark as complete** (the bonus task) with an animated confirmation and **Undo**.
+- **Accessibility:** labelled inputs, `aria` attributes on icon buttons and toggles, and keyboard focus rings.
 
+### Stretch goal: project tasks and completion bar!
 
-  ### Stretch goal: project tasks
-
-- Projects can have an optional checklist of tasks. Tasks can be added, ticked off and deleted on the details page.
-- A progress bar shows how many tasks are done, on both the details page and the list cards.
-- **Tasks are optional** (`tasks?: ITask[]`), so existing projects work unchanged. Projects without tasks show no bar.
-- **Edits keep tasks.** `ProjectForm` passes `initialValues.tasks` through, so saving a project edit can't wipe its tasks.
-- **Task logic lives in pure utils** (`src/utils/tasks.ts`): create, toggle, remove and progress all return new arrays without modifying the original.
-- **Status stays manual.** Completing every task doesn't change the project's status, so the user stays in control and Undo still makes sense.
+- An optional checklist on each project: add, tick off and delete tasks.
+- A progress bar on the details page and the list cards.
+- `tasks` is optional, so existing projects work unchanged.
+- `ProjectForm` passes tasks through, so editing a project doesn't wipe them.
+- Status stays manual: finishing every task doesn't complete the project.
 
 ### Validation
 
-`validateProject` checks that:
+- Name, description and start date are required.
+- The due date can't be before the start date.
+- Due date is optional
 
-- name, description and start date are filled in, ignoring surrounding whitespace
-- the due date is not before the start date
+### Key decisions
 
-Errors appear under each field. The same validation runs when creating and when editing.
-
-### Decisions and changes along the way
-
-- **`id` added to the interface.** This supports multiple projects and per-project URLs. `NewProject` (`Omit<IProject, "id">`) is used for form data before an id is assigned.
-- **Status as an enum.** The select options are generated from `ProjectStatus`, so adding a status needs no form changes.
-- **Simplified the form.** The form was reduced to plain controlled inputs with shared Tailwind class constants.
-- **Navigation.** An "← All projects" back link was added to the form and details pages.
-- **Due date wording.** "Due date: No due date" was shortened to "No due date".
-- **The edit form reuses `ProjectForm`.** I first implemented a separate draft state in the details page. I then made the existing form take `initialValues`, `submitLabel` and an optional `onCancel`, so creating and editing share one set of fields and one validation path.
-- **Edit mode is tied to a project id.** The details page stores *which* project is being edited, not a plain true/false. Moving to another project (for example with the browser's back button) automatically leaves edit mode.
-- **Updates create new arrays.** Updating uses `.map()` to replace only the edited project, so React sees new state and re-renders.
-- **Logic separated in utils.** Filtering, sorting, due date labels and date formatting are plain functions in `src/utils/`, separate from the components. The date-based ones take an optional `today` parameter, so they can be tested with a fixed date.
-- **Status filter moved from a dropdown to tiles.** The status `<select>` was replaced by clickable count tiles, so filtering takes one click instead of two and the counts are visible at a glance.
-- **Stacked sections instead of columns.** I considered kanban-style columns, but chose stacked sections so the cards keep a comfortable width.
-- **One source for status order and colours.**
-  - `STATUS_DISPLAY_ORDER` drives both the sorting and the section order.
-  - `src/styles/statusStyles.ts` holds the colours for each status, shared by the list and details pages.
-  - Both are typed as `Record<ProjectStatus, …>`, so adding a status without colours is a type error.
-- **Sorting copies the array first.** `.sort()` changes an array in place, so `sortProjects` sorts a copy and never modifies props.
-- **The Manrope font from the Tailwind config is now applied.** It was defined in the config but never loaded or used.
-- **Mark as complete has Undo.** The details page remembers which project was just completed, the same pattern as edit mode, so Undo only appears straight after completing.
+- **Logic in utils** (`src/utils/`): filtering, sorting, dates and tasks are separate from the components. 
+- **One source for status order and colours:** `STATUS_DISPLAY_ORDER` and `styles/statusStyles.ts`, typed as `Record<ProjectStatus, …>` so a missing status is a type error.
+- **Immutable updates:** state is always replaced with new arrays and objects, never modified.
+- **Status tiles instead of a dropdown:** one click to filter, and the counts are visible.
+- I decided on **stacked sections instead of kanban columns,** so the cards stay readable.
+- **Edit mode and Undo are tied to a project id** so they reset when you move to another project.
+- **One `renderCard` function** renders both the real cards and the faded preview. The preview is hidden from screen readers and can't be focused.
 
 ### UI screenshots
 
@@ -136,6 +105,11 @@ Errors appear under each field. The same validation runs when creating and when 
 | ![Details before](public/ui_screenshots/details%20before.png) | ![Details after](public/ui_screenshots/details%20after.png) |
 
 
-### Notes
+### Final Project List
+![List Final](public/ui_screenshots/final%20list%20projects.png)
 
-Id generation is inconsistent with created projects and mock projects. Created in app with Date.now().toString(). Task ids are also marked as 1-1, 1-2 but are generated with crypto.randomUUID()
+### Considerations and future
+
+- **Id formats differ.** Mock data uses readable ids (`"1"`, `"1-1"`); the app uses `Date.now()` for projects and `crypto.randomUUID()` for tasks. Ids are only compared for equality, so this doesn't affect behaviour.
+- Date helpers are overlapping and could be collected into one util. 
+- Styling the delete popup rather than having it drawn by the browser.
