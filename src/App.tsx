@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Route, Routes, useNavigate } from "react-router-dom";
+import { Link, Route, Routes, useNavigate } from "react-router-dom";
 import type { IProject, NewProject } from "./models/Project";
 import ProjectForm from "./components/ProjectForm";
 import ProjectList from "./components/ProjectList";
@@ -14,6 +14,14 @@ export default function App() {
     const project = { ...newProject, id: Date.now().toString() };
     setProjects((prevProjects) => [...prevProjects, project]);
     navigate(`/projects/${project.id}`);
+  }
+
+  function handleUpdateProject(updatedProject: IProject) {
+    setProjects((prevProjects) =>
+      prevProjects.map((project) =>
+        project.id === updatedProject.id ? updatedProject : project
+      )
+    );
   }
 
   function handleDeleteProject(id: string) {
@@ -36,8 +44,18 @@ export default function App() {
       <Routes>
         <Route path="/" element={<ProjectList projects={projects} />} />
         <Route path="/projects" element={<ProjectList projects={projects} />} />
-        <Route path="/projects/new" element={<ProjectForm onSubmit={handleCreateProject} />} />
-        <Route path="/projects/:id" element={<ProjectDetails projects={projects} onDelete={handleDeleteProject} />} />
+        <Route
+          path="/projects/new"
+          element={
+            <section className="mx-auto w-full max-w-xl p-6">
+              <Link to="/" className="font-medium text-green-500 hover:underline">
+                ← All projects
+              </Link>
+              <ProjectForm onSubmit={handleCreateProject} />
+            </section>
+          }
+        />
+        <Route path="/projects/:id" element={<ProjectDetails projects={projects} onDelete={handleDeleteProject} onUpdate={handleUpdateProject} />} />
       </Routes>
     </main>
   );
