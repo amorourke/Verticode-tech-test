@@ -5,6 +5,7 @@ import {
   filterProjects,
   parseProjectFilters,
   type ProjectFilters,
+  type StatusFilter,
 } from "../utils/filterProjects";
 
 const LABEL = "mb-1 block text-sm font-medium";
@@ -15,12 +16,20 @@ interface ProjectListProps {
 }
 
 export default function ProjectList({ projects }: ProjectListProps) {
-  // Filters live in the URL so they survive opening a project and going back
   const [searchParams, setSearchParams] = useSearchParams();
   const filters = parseProjectFilters(searchParams);
   const visibleProjects = filterProjects(projects, filters);
   const hasActiveFilters =
     filters.search.trim() !== "" || filters.status !== "all" || filters.dueDate !== "all";
+
+  const statusCounts: { value: StatusFilter; label: string; count: number }[] = [
+    { value: "all", label: "Total projects", count: projects.length },
+    ...Object.values(ProjectStatus).map((status) => ({
+      value: status,
+      label: status,
+      count: projects.filter((project) => project.status === status).length,
+    })),
+  ];
 
   function updateFilter(key: keyof ProjectFilters, value: string) {
     setSearchParams(
@@ -43,6 +52,25 @@ export default function ProjectList({ projects }: ProjectListProps) {
         </Link>
       </div>
 
+      <div className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {statusCounts.map(({ value, label, count }) => {
+          const isActive = filters.status === value;
+          return (
+            <button
+              key={value}
+              type="button"
+              aria-pressed={isActive}
+              onClick={() => updateFilter("status", value)}
+              className={`rounded-md px-3 py-2 text-left ${
+                isActive ? "bg-light-green-400/60" : "hover:bg-gray-50"
+              }`}>
+              <span className="block text-2xl font-bold text-green">{count}</span>
+              <span className="block text-sm text-gray-600">{label}</span>
+            </button>
+          );
+        })}
+      </div>
+
       <div className="mb-4">
         <label htmlFor="search" className={LABEL}>Search</label>
         <input
@@ -55,33 +83,17 @@ export default function ProjectList({ projects }: ProjectListProps) {
         />
       </div>
 
-      <div className="mb-6 grid gap-4 sm:grid-cols-2">
-        <div>
-          <label htmlFor="statusFilter" className={LABEL}>Status</label>
-          <select
-            id="statusFilter"
-            className={SELECT}
-            value={filters.status}
-            onChange={(e) => updateFilter("status", e.target.value)}>
-            <option value="all">All statuses</option>
-            {Object.values(ProjectStatus).map((status) => (
-              <option key={status} value={status}>{status}</option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="dueDateFilter" className={LABEL}>Due date</label>
-          <select
-            id="dueDateFilter"
-            className={SELECT}
-            value={filters.dueDate}
-            onChange={(e) => updateFilter("dueDate", e.target.value)}>
-            {Object.entries(DUE_DATE_FILTER_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
-            ))}
-          </select>
-        </div>
+      <div className="mb-6">
+        <label htmlFor="dueDateFilter" className={LABEL}>Due date</label>
+        <select
+          id="dueDateFilter"
+          className={SELECT}
+          value={filters.dueDate}
+          onChange={(e) => updateFilter("dueDate", e.target.value)}>
+          {Object.entries(DUE_DATE_FILTER_LABELS).map(([value, label]) => (
+            <option key={value} value={value}>{label}</option>
+          ))}
+        </select>
       </div>
 
       {visibleProjects.length > 0 ? (
