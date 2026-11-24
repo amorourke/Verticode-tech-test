@@ -41,7 +41,7 @@ export default function ProjectDetails({ projects, onDelete, onUpdate }: Project
   const dueDateLabel = getDueDateLabel(project);
   const styles = STATUS_STYLES[project.status];
   const isOverdue = dueDateLabel?.tone === "overdue";
-  const canUndoComplete = justCompletedId === project.id && project.status === ProjectStatus.Complete;
+  const showCompletedMessage = justCompletedId === project.id && project.status === ProjectStatus.Complete;
 
   function markAsComplete() {
     onUpdate({ ...project!, status: ProjectStatus.Complete });
@@ -136,19 +136,26 @@ export default function ProjectDetails({ projects, onDelete, onUpdate }: Project
               <button
                 type="button"
                 onClick={markAsComplete}
-                className="rounded-md bg-green px-4 py-2 font-medium text-white hover:bg-green-600">
+                className="rounded-md bg-green-500 px-4 py-2 font-medium text-white hover:bg-green-600">
                 Mark as complete
               </button>
             )}
-            {canUndoComplete && (
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-gray-600">Marked as complete</span>
+            {showCompletedMessage && (
+              <div className="flex items-center gap-4">
                 <button
                   type="button"
                   onClick={undoComplete}
-                  className="rounded-md border border-green px-4 py-2 font-medium text-green hover:bg-black/5">
+                  className="rounded-md border border-green-500 px-4 py-2 text-sm font-medium text-green-500 hover:bg-black/5">
                   Undo
                 </button>
+                <span className="flex items-center gap-2 text-sm font-medium text-green-500">
+                  <span className="flex h-7 w-7 animate-pop items-center justify-center rounded-full bg-green-500 text-white" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="h-4 w-4">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                    </svg>
+                  </span>
+                  Marked as complete
+                </span>
               </div>
             )}
           </div>

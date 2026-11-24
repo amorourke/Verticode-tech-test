@@ -6,6 +6,16 @@ export default {
       fontFamily: {
         manrope: ["Manrope", "sans-serif"],
       },
+      keyframes: {
+        pop: {
+          "0%": { transform: "scale(0.5)", opacity: "0" },
+          "60%": { transform: "scale(1.15)", opacity: "1" },
+          "100%": { transform: "scale(1)" },
+        },
+      },
+      animation: {
+        pop: "pop 300ms ease-out",
+      },
       colors: {
         green: {
           DEFAULT: "#133A30",

@@ -59,8 +59,10 @@ export default function ProjectList({ projects }: ProjectListProps) {
           <h1 className="text-4xl font-normal text-green">My Projects</h1>
           <p className="mt-1 text-sm text-gray-600">Manage, track and create projects</p>
         </div>
-        <Link to="/projects/new" className="rounded-md bg-green px-5 py-3 font-medium text-white">
-          New project
+        <Link
+          to="/projects/new"
+          className="group flex items-center gap-2 rounded-lg bg-gradient-to-r from-green-400 to-green px-5 py-3 font-semibold text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:brightness-110">
+          + New project
         </Link>
       </div>
 
