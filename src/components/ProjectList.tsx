@@ -19,13 +19,14 @@ export default function ProjectList({ projects }: ProjectListProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const filters = parseProjectFilters(searchParams);
   const visibleProjects = filterProjects(projects, filters);
-  const hasActiveFilters = filters.status !== "all" || filters.dueDate !== "all";
+  const hasActiveFilters =
+    filters.search.trim() !== "" || filters.status !== "all" || filters.dueDate !== "all";
 
   function updateFilter(key: keyof ProjectFilters, value: string) {
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev);
-        if (value === "all") next.delete(key);
+        if (value === "" || value === "all") next.delete(key);
         else next.set(key, value);
         return next;
       },
@@ -40,6 +41,18 @@ export default function ProjectList({ projects }: ProjectListProps) {
         <Link to="/projects/new" className="rounded-md bg-green px-4 py-2 font-medium text-white">
           New project
         </Link>
+      </div>
+
+      <div className="mb-4">
+        <label htmlFor="search" className={LABEL}>Search</label>
+        <input
+          id="search"
+          type="search"
+          placeholder="Search by project name"
+          className={SELECT}
+          value={filters.search}
+          onChange={(e) => updateFilter("search", e.target.value)}
+        />
       </div>
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2">

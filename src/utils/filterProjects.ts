@@ -4,6 +4,7 @@ export type StatusFilter = ProjectStatus | "all";
 export type DueDateFilter = "all" | "overdue" | "next7" | "next30" | "none";
 
 export interface ProjectFilters {
+  search: string;
   status: StatusFilter;
   dueDate: DueDateFilter;
 }
@@ -21,6 +22,7 @@ export function parseProjectFilters(params: URLSearchParams): ProjectFilters {
   const dueDate = params.get("dueDate");
 
   return {
+    search: params.get("search") ?? "",
     status: isStatus(status) ? status : "all",
     dueDate: isDueDateFilter(dueDate) ? dueDate : "all",
   };
@@ -31,8 +33,11 @@ export function filterProjects(
   filters: ProjectFilters,
   today: Date = new Date()
 ): IProject[] {
+  const search = filters.search.trim().toLowerCase();
+
   return projects.filter(
     (project) =>
+      project.name.toLowerCase().includes(search) &&
       (filters.status === "all" || project.status === filters.status) &&
       matchesDueDate(project, filters.dueDate, today)
   );
