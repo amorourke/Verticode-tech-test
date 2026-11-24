@@ -160,7 +160,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
           <div className="sm:w-52">
             <label htmlFor="search" className={LABEL}>Search</label>
             <div className="relative">
-              <svg //magnifying glass icon
+              <svg 
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
