@@ -145,7 +145,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
                     <li key={project.id}>
                       <Link
                         to={`/projects/${project.id}`}
-                        className={`flex h-full flex-col rounded-xl border p-6 shadow-sm transition-all duration-200 hover:scale-[1.03] hover:shadow-xl ${styles.card} ${styles.cardHover} ${
+                        className={`flex h-full flex-col rounded-3xl border p-6 shadow-sm transition-all duration-200 hover:scale-[1.03] hover:shadow-xl ${styles.card} ${styles.cardHover} ${
                           isOverdue ? OVERDUE_BORDER : styles.border
                         }`}>
                         <span className="line-clamp-2 text-lg font-bold text-gray-900">{project.name}</span>
