@@ -35,6 +35,7 @@ export default function ProjectForm({
       startDate,
       dueDate: dueDate || undefined,
       status,
+      tasks: initialValues?.tasks,
     };
 
     const newErrors = validateProject(project);
