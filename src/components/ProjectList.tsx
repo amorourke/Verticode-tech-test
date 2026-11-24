@@ -61,7 +61,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
         </div>
         <Link
           to="/projects/new"
-          className="group flex items-center gap-2 rounded-lg bg-gradient-to-r from-green-400 to-green px-5 py-3 font-semibold text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:brightness-110">
+          className="group flex items-center gap-2 rounded-lg bg-gradient-to-r from-green-400 to-green px-5 py-3 font-semibold text-white shadow-sm transition-all duration-200 hover:scale-[1.03] hover:shadow-xl">
           + New project
         </Link>
       </div>
@@ -133,7 +133,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
                     <li key={project.id}>
                       <Link
                         to={`/projects/${project.id}`}
-                        className={`flex h-full flex-col rounded-xl border p-6 transition-colors ${styles.card} ${styles.cardHover} ${
+                        className={`flex h-full flex-col rounded-xl border p-6 shadow-sm transition-all duration-200 hover:scale-[1.03] hover:shadow-xl ${styles.card} ${styles.cardHover} ${
                           isOverdue ? OVERDUE_BORDER : styles.border
                         }`}>
                         <span className="line-clamp-2 text-lg font-bold text-gray-900">{project.name}</span>
