@@ -24,6 +24,7 @@ export default function ProjectDetails({ projects, onDelete, onUpdate }: Project
   const project = projects.find((project) => project.id === id);
 
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [justCompletedId, setJustCompletedId] = useState<string | null>(null);
 
   if (!project) {
     return (
@@ -40,6 +41,17 @@ export default function ProjectDetails({ projects, onDelete, onUpdate }: Project
   const dueDateLabel = getDueDateLabel(project);
   const styles = STATUS_STYLES[project.status];
   const isOverdue = dueDateLabel?.tone === "overdue";
+  const canUndoComplete = justCompletedId === project.id && project.status === ProjectStatus.Complete;
+
+  function markAsComplete() {
+    onUpdate({ ...project!, status: ProjectStatus.Complete });
+    setJustCompletedId(project!.id);
+  }
+
+  function undoComplete() {
+    onUpdate({ ...project!, status: ProjectStatus.InProgress });
+    setJustCompletedId(null);
+  }
 
   return (
     <section className="mx-auto w-full max-w-3xl p-6">
@@ -123,10 +135,21 @@ export default function ProjectDetails({ projects, onDelete, onUpdate }: Project
             {project.status === ProjectStatus.InProgress && (
               <button
                 type="button"
-                onClick={() => onUpdate({ ...project, status: ProjectStatus.Complete })}
+                onClick={markAsComplete}
                 className="rounded-md bg-green px-4 py-2 font-medium text-white hover:bg-green-600">
                 Mark as complete
               </button>
+            )}
+            {canUndoComplete && (
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-gray-600">Marked as complete</span>
+                <button
+                  type="button"
+                  onClick={undoComplete}
+                  className="rounded-md border border-green px-4 py-2 font-medium text-green hover:bg-black/5">
+                  Undo
+                </button>
+              </div>
             )}
           </div>
         </article>
