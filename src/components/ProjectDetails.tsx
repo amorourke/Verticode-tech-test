@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import type { IProject } from "../models/Project";
+import { ProjectStatus, type IProject } from "../models/Project";
 import ProjectForm from "./ProjectForm";
 import { formatDate } from "../utils/formatDate";
 
@@ -13,7 +13,8 @@ interface ProjectDetailsProps {
 export default function ProjectDetails({ projects, onDelete, onUpdate }: ProjectDetailsProps) {
   const { id } = useParams();
   const project = projects.find((project) => project.id === id);
-  const [isEditing, setIsEditing] = useState(false);
+
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   if (!project) {
     return (
@@ -26,6 +27,9 @@ export default function ProjectDetails({ projects, onDelete, onUpdate }: Project
     );
   }
 
+  const isEditing = editingId === project.id;
+  const isComplete = project.status === ProjectStatus.Complete;
+
   return (
     <section className="mx-auto w-full max-w-xl p-6">
       <Link to="/" className="font-medium text-green-500 hover:underline">
@@ -33,15 +37,18 @@ export default function ProjectDetails({ projects, onDelete, onUpdate }: Project
       </Link>
 
       {isEditing ? (
-        <ProjectForm
-          initialValues={project}
-          submitLabel="Save"
-          onSubmit={(updated) => {
-            onUpdate({ ...updated, id: project.id });
-            setIsEditing(false);
-          }}
-          onCancel={() => setIsEditing(false)}
-        />
+        <>
+          <h1 className="mt-4 text-2xl font-bold text-green">Edit project</h1>
+          <ProjectForm
+            initialValues={project}
+            submitLabel="Save"
+            onSubmit={(updated) => {
+              onUpdate({ ...updated, id: project.id });
+              setEditingId(null);
+            }}
+            onCancel={() => setEditingId(null)}
+          />
+        </>
       ) : (
         <>
           <h1 className="mt-4 text-2xl font-bold text-green">{project.name}</h1>
@@ -53,11 +60,19 @@ export default function ProjectDetails({ projects, onDelete, onUpdate }: Project
             <p>{project.dueDate ? `Due date: ${formatDate(project.dueDate)}` : "No due date"}</p>
           </div>
 
-          <div className="mt-6 flex gap-3">
+          <div className="mt-6 flex flex-wrap gap-3">
+            {!isComplete && (
+              <button
+                type="button"
+                onClick={() => onUpdate({ ...project, status: ProjectStatus.Complete })}
+                className="rounded-md bg-green px-4 py-2 font-medium text-white">
+                Mark as complete
+              </button>
+            )}
             <button
               type="button"
-              onClick={() => setIsEditing(true)}
-              className="rounded-md bg-green px-4 py-2 font-medium text-white">
+              onClick={() => setEditingId(project.id)}
+              className="rounded-md border border-green px-4 py-2 font-medium text-green hover:bg-light-green-400">
               Edit project
             </button>
             <button

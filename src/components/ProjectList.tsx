@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 
 interface ProjectListProps {
     projects: IProject[]
-    onDelete?: (projectId: string) => void;
 }
 
 export default function ProjectList({ projects }: ProjectListProps) {
