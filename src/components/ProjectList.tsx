@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import type { IProject } from "../models/Project";
+import type { IProject, ProjectStatus } from "../models/Project";
 import {
   DUE_DATE_FILTER_LABELS,
   filterProjects,
@@ -15,6 +16,7 @@ import { getTaskProgress } from "../utils/tasks";
 
 const LABEL = "mb-1 block text-xs font-medium";
 const SELECT = "w-full rounded-md border border-gray-300 px-2.5 py-1.5 text-sm";
+const CARDS_PER_SECTION = 3;
 
 interface ProjectListProps {
   projects: IProject[];
@@ -22,6 +24,7 @@ interface ProjectListProps {
 
 export default function ProjectList({ projects }: ProjectListProps) {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [expandedSections, setExpandedSections] = useState<ProjectStatus[]>([]);
   const filters = parseProjectFilters(searchParams);
   const visibleProjects = sortProjects(filterProjects(projects, filters));
 
@@ -50,6 +53,59 @@ export default function ProjectList({ projects }: ProjectListProps) {
         return next;
       },
       { replace: true }
+    );
+  }
+
+  function toggleSection(status: ProjectStatus) {
+    setExpandedSections((prev) =>
+      prev.includes(status) ? prev.filter((s) => s !== status) : [...prev, status]
+    );
+  }
+
+  function renderCard(project: IProject, isGhost = false) {
+    const dueDateLabel = getDueDateLabel(project);
+    const styles = STATUS_STYLES[project.status];
+    const isOverdue = dueDateLabel?.tone === "overdue";
+    const progress = getTaskProgress(project.tasks);
+
+    return (
+      <Link
+        to={`/projects/${project.id}`}
+        tabIndex={isGhost ? -1 : undefined}
+        className={`flex h-full flex-col rounded-3xl border p-6 shadow-sm transition-all duration-200 hover:scale-[1.03] hover:shadow-xl ${styles.card} ${styles.cardHover} ${
+          isOverdue ? OVERDUE_BORDER : styles.border
+        }`}>
+        <span className="line-clamp-2 text-lg font-bold text-gray-900">{project.name}</span>
+        <span className="mt-2 line-clamp-2 text-sm text-gray-600">{project.description}</span>
+
+        {progress && (
+          <span className="mt-4 flex items-center gap-2">
+            <span className="h-1.5 flex-1 rounded-full bg-black/10">
+              <span
+                className="block h-full rounded-full bg-green-500"
+                style={{ width: `${progress.percent}%` }}
+              />
+            </span>
+            <span className="text-xs text-gray-500">{progress.done}/{progress.total}</span>
+          </span>
+        )}
+
+        <span className="mt-auto flex items-end justify-between gap-3 pt-4">
+          <span className="text-xs text-gray-500">
+            {project.dueDate ? `Due ${formatDate(project.dueDate, "short")}` : "No due date"}
+          </span>
+          <span className="flex flex-wrap justify-end gap-2">
+            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${styles.badge}`}>
+              {project.status}
+            </span>
+            {dueDateLabel && (
+              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${DUE_DATE_TONE_STYLES[dueDateLabel.tone]}`}>
+                {dueDateLabel.text}
+              </span>
+            )}
+          </span>
+        </span>
+      </Link>
     );
   }
 
@@ -129,65 +185,51 @@ export default function ProjectList({ projects }: ProjectListProps) {
 
       {visibleProjects.length > 0 ? (
         <div className="flex flex-col gap-10">
-          {sections.map((section) => (
-            <section key={section.status}>
-              <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-gray-900">
-                <span className={`h-2.5 w-2.5 rounded-full ${STATUS_STYLES[section.status].dot}`} />
-                {section.status}
-                <span className="text-sm font-medium text-gray-500">{section.projects.length}</span>
-              </h2>
+          {sections.map((section) => {
+            const isExpanded = expandedSections.includes(section.status) || filters.status !== "all";
+            const hasMore = section.projects.length > CARDS_PER_SECTION;
+            const shownProjects = isExpanded ? section.projects : section.projects.slice(0, CARDS_PER_SECTION);
 
-              <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {section.projects.map((project) => {
-                  const dueDateLabel = getDueDateLabel(project);
-                  const styles = STATUS_STYLES[project.status];
-                  const isOverdue = dueDateLabel?.tone === "overdue";
-                  const progress = getTaskProgress(project.tasks);
+            return (
+              <section key={section.status}>
+                <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-gray-900">
+                  <span className={`h-2.5 w-2.5 rounded-full ${STATUS_STYLES[section.status].dot}`} />
+                  {section.status}
+                  <span className="text-sm font-medium text-gray-500">{section.projects.length}</span>
+                </h2>
 
-                  return (
-                    <li key={project.id}>
-                      <Link
-                        to={`/projects/${project.id}`}
-                        className={`flex h-full flex-col rounded-3xl border p-6 shadow-sm transition-all duration-200 hover:scale-[1.03] hover:shadow-xl ${styles.card} ${styles.cardHover} ${
-                          isOverdue ? OVERDUE_BORDER : styles.border
-                        }`}>
-                        <span className="line-clamp-2 text-lg font-bold text-gray-900">{project.name}</span>
-                        <span className="mt-2 line-clamp-2 text-sm text-gray-600">{project.description}</span>
+                <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {shownProjects.map((project) => (
+                    <li key={project.id}>{renderCard(project)}</li>
+                  ))}
+                </ul>
 
-                        {progress && (
-                          <span className="mt-4 flex items-center gap-2">
-                            <span className="h-1.5 flex-1 rounded-full bg-black/10">
-                              <span
-                                className="block h-full rounded-full bg-green-500"
-                                style={{ width: `${progress.percent}%` }}
-                              />
-                            </span>
-                            <span className="text-xs text-gray-500">{progress.done}/{progress.total}</span>
-                          </span>
-                        )}
+                {hasMore && !isExpanded && (
+                  <div className="relative mt-6 max-h-16 overflow-hidden" aria-hidden="true">
+                    <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                      {section.projects.slice(CARDS_PER_SECTION, CARDS_PER_SECTION * 2).map((project) => (
+                        <li key={project.id}>{renderCard(project, true)}</li>
+                      ))}
+                    </ul>
+                    <div
+                      onClick={() => toggleSection(section.status)}
+                      className="absolute inset-0 cursor-pointer bg-gradient-to-b from-gray-50/0 to-gray-50"
+                    />
+                  </div>
+                )}
 
-                        <span className="mt-auto flex items-end justify-between gap-3 pt-4">
-                          <span className="text-xs text-gray-500">
-                            {project.dueDate ? `Due ${formatDate(project.dueDate, "short")}` : "No due date"}
-                          </span>
-                          <span className="flex flex-wrap justify-end gap-2">
-                            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${styles.badge}`}>
-                              {project.status}
-                            </span>
-                            {dueDateLabel && (
-                              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${DUE_DATE_TONE_STYLES[dueDateLabel.tone]}`}>
-                                {dueDateLabel.text}
-                              </span>
-                            )}
-                          </span>
-                        </span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
-          ))}
+                {hasMore && filters.status === "all" && (
+                  <button
+                    type="button"
+                    onClick={() => toggleSection(section.status)}
+                    aria-expanded={isExpanded}
+                    className="mx-auto mt-4 block text-sm font-medium text-green-500 hover:underline">
+                    {isExpanded ? "Show less" : `Show all`}
+                  </button>
+                )}
+              </section>
+            );
+          })}
         </div>
       ) : (
         <div className="rounded-md border border-dashed border-gray-300 p-6 text-center text-gray-600">
