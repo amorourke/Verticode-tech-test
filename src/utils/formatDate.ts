@@ -3,10 +3,10 @@ export function parseDate(date: string): Date {
   return new Date(year, month - 1, day);
 }
 
-export function formatDate(date: string): string {
+export function formatDate(date: string, month: "long" | "short" = "long"): string {
   return new Intl.DateTimeFormat("en-GB", {
     day: "numeric",
-    month: "long",
+    month,
     year: "numeric",
   }).format(parseDate(date));
 }

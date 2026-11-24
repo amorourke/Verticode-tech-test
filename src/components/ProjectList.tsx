@@ -8,9 +8,37 @@ import {
   type StatusFilter,
 } from "../utils/filterProjects";
 import { DUE_DATE_TONE_STYLES, getDueDateLabel } from "../utils/getDueDateLabel";
+import { STATUS_DISPLAY_ORDER, sortProjects } from "../utils/sortProjects";
+import { formatDate } from "../utils/formatDate";
 
 const LABEL = "mb-1 block text-xs font-medium";
 const SELECT = "w-full rounded-md border border-gray-300 px-2.5 py-1.5 text-sm";
+
+const STATUS_CARD_STYLES: Record<
+  ProjectStatus,
+  { background: string; border: string; badge: string; dot: string }
+> = {
+  [ProjectStatus.NotStarted]: {
+    background: "bg-gray-50 hover:bg-gray-100",
+    border: "border-gray-200",
+    badge: "bg-gray-200 text-gray-700",
+    dot: "bg-gray-400",
+  },
+  [ProjectStatus.InProgress]: {
+    background: "bg-blue-50 hover:bg-blue-100",
+    border: "border-blue-200",
+    badge: "bg-blue-100 text-blue-800",
+    dot: "bg-blue-500",
+  },
+  [ProjectStatus.Complete]: {
+    background: "bg-light-green-400/50 hover:bg-light-green-400",
+    border: "border-light-green-600",
+    badge: "bg-light-green text-green",
+    dot: "bg-green-400",
+  },
+};
+
+const OVERDUE_BORDER = "border-red-400 ring-2 ring-red-100";
 
 interface ProjectListProps {
   projects: IProject[];
@@ -19,7 +47,13 @@ interface ProjectListProps {
 export default function ProjectList({ projects }: ProjectListProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const filters = parseProjectFilters(searchParams);
-  const visibleProjects = filterProjects(projects, filters);
+  const visibleProjects = sortProjects(filterProjects(projects, filters));
+
+  // One section per status, skipping empty ones. visibleProjects is already sorted by due date.
+  const sections = STATUS_DISPLAY_ORDER.map((status) => ({
+    status,
+    projects: visibleProjects.filter((project) => project.status === status),
+  })).filter((section) => section.projects.length > 0);
   const hasActiveFilters =
     filters.search.trim() !== "" || filters.status !== "all" || filters.dueDate !== "all";
 
@@ -45,10 +79,13 @@ export default function ProjectList({ projects }: ProjectListProps) {
   }
 
   return (
-    <section className="mx-auto w-full max-w-5xl p-6">
+    <section className="mx-auto w-full max-w-5xl p-6 pt-12">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-green">Projects</h1>
-        <Link to="/projects/new" className="rounded-md bg-green px-4 py-2 font-medium text-white">
+        <div>
+          <h1 className="text-4xl font-normal text-green">My Projects</h1>
+          <p className="mt-1 text-sm text-gray-600">Manage, track and create projects</p>
+        </div>
+        <Link to="/projects/new" className="rounded-md bg-green px-5 py-3 font-medium text-white">
           New project
         </Link>
       </div>
@@ -102,27 +139,52 @@ export default function ProjectList({ projects }: ProjectListProps) {
       </div>
 
       {visibleProjects.length > 0 ? (
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {visibleProjects.map((project) => {
-            const dueDateLabel = getDueDateLabel(project);
-            return (
-              <li key={project.id}>
-                <Link to={`/projects/${project.id}`} className="flex h-full flex-col rounded-md border border-gray-300 p-4 hover:bg-light-green-400">
-                  <span className="block font-medium">{project.name}</span>
-                  <span className="mt-1 line-clamp-2 text-sm text-gray-600">{project.description}</span>
-                  <span className="mt-auto flex flex-wrap items-center gap-2 pt-3">
-                    <span className="text-sm text-gray-600">{project.status}</span>
-                    {dueDateLabel && (
-                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${DUE_DATE_TONE_STYLES[dueDateLabel.tone]}`}>
-                        {dueDateLabel.text}
-                      </span>
-                    )}
-                  </span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+        <div className="flex flex-col gap-10">
+          {sections.map((section) => (
+            <section key={section.status}>
+              <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-gray-900">
+                <span className={`h-2.5 w-2.5 rounded-full ${STATUS_CARD_STYLES[section.status].dot}`} />
+                {section.status}
+                <span className="text-sm font-medium text-gray-500">{section.projects.length}</span>
+              </h2>
+
+              <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {section.projects.map((project) => {
+                  const dueDateLabel = getDueDateLabel(project);
+                  const styles = STATUS_CARD_STYLES[project.status];
+                  const isOverdue = dueDateLabel?.tone === "overdue";
+                  return (
+                    <li key={project.id}>
+                      <Link
+                        to={`/projects/${project.id}`}
+                        className={`flex h-full flex-col rounded-xl border p-6 transition-colors ${styles.background} ${
+                          isOverdue ? OVERDUE_BORDER : styles.border
+                        }`}>
+                        <span className="line-clamp-2 text-lg font-bold text-gray-900">{project.name}</span>
+                        <span className="mt-2 line-clamp-2 text-sm text-gray-600">{project.description}</span>
+                        <span className="mt-auto flex items-end justify-between gap-3 pt-4">
+                          <span className="text-xs text-gray-500">
+                            {project.dueDate ? `Due ${formatDate(project.dueDate, "short")}` : "No due date"}
+                          </span>
+                          <span className="flex flex-wrap justify-end gap-2">
+                            {dueDateLabel && (
+                              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${DUE_DATE_TONE_STYLES[dueDateLabel.tone]}`}>
+                                {dueDateLabel.text}
+                              </span>
+                            )}
+                            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${styles.badge}`}>
+                              {project.status}
+                            </span>
+                          </span>
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ))}
+        </div>
       ) : (
         <div className="rounded-md border border-dashed border-gray-300 p-6 text-center text-gray-600">
           <p>{hasActiveFilters ? "No projects match these filters." : "No projects yet."}</p>

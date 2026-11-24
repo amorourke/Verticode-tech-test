@@ -48,10 +48,12 @@ export default function App() {
           path="/projects/new"
           element={
             <section className="mx-auto w-full max-w-xl p-6">
-              <Link to="/" className="font-medium text-green-500 hover:underline">
+              <Link
+                to="/"
+                className="inline-block rounded-md border border-green-500 bg-transparent px-4 py-2 text-sm font-medium text-green-500 hover:bg-light-green-400">
                 ← All projects
               </Link>
-              <ProjectForm onSubmit={handleCreateProject} />
+              <ProjectForm onSubmit={handleCreateProject} onCancel={() => navigate("/")} />
             </section>
           }
         />

@@ -13,7 +13,8 @@ const STATUS_STYLES: Record<ProjectStatus, string> = {
 
 const PILL = "rounded-full px-3 py-1 text-sm font-medium";
 const CARD ="mt-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8";
-const BACK_LINK = "text-sm font-medium text-green-500 hover:underline";
+const BACK_LINK =
+  "inline-block rounded-md border border-green-500 bg-transparent px-4 py-2 text-sm font-medium text-green-500 hover:bg-light-green-400";
 
 interface ProjectDetailsProps {
   projects: IProject[];
@@ -39,7 +40,6 @@ export default function ProjectDetails({ projects, onDelete, onUpdate }: Project
   }
 
   const isEditing = editingId === project.id;
-  const isComplete = project.status === ProjectStatus.Complete;
   const dueDateLabel = getDueDateLabel(project);
 
   return (
@@ -91,7 +91,15 @@ export default function ProjectDetails({ projects, onDelete, onUpdate }: Project
           </dl>
 
           <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-gray-200 pt-6">
-            {!isComplete && (
+            {project.status === ProjectStatus.NotStarted && (
+              <button
+                type="button"
+                onClick={() => onUpdate({ ...project, status: ProjectStatus.InProgress })}
+                className="rounded-md bg-green px-4 py-2 font-medium text-white hover:bg-green-600">
+                Start project
+              </button>
+            )}
+            {project.status === ProjectStatus.InProgress && (
               <button
                 type="button"
                 onClick={() => onUpdate({ ...project, status: ProjectStatus.Complete })}
