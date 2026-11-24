@@ -62,13 +62,31 @@ These criteria are designed to reflect our company's everyday work style.
 
 ### Features
 
-- **Create a project.** The form has a name, description, start date, optional due date and a status select. On submit, the form is replaced by the new project's details page.
-- **Project list.** The home page lists every project with its status and links to each one.
-- **Project details.** Shows all fields, with dates formatted for reading (e.g. "24 November 2026"). Projects without a due date show "No due date".
-- **Edit a project.** "Edit project" swaps the details for the same form, pre-filled, with Save and Cancel. Cancel throws away the changes.
-- **Mark as complete** (bonus task). A one-click button on the details page. It is hidden once the project is complete.
+- **Create a project.** The form has a name, description, start date, optional due date and a status select. On submit, the form is replaced by the new project's details page. Cancel returns to the list.
+- **Project list.**
+  - Projects are grouped into sections: **In progress**, **Not started**, then **Complete**. Each section has a coloured heading and a count, and empty sections are hidden.
+  - Within each section, projects are sorted by due date, most urgent first. Projects without a due date go last.
+  - Each card shows the name, a two-line description, the due date ("Due 21 Dec 2026"), a status pill and a due date pill.
+  - Cards are colour-coded by status, and overdue cards have a red border.
+- **Status tiles.** Tiles at the top show the number of projects in each status. Clicking a tile filters the list to that status.
+- **Search and due date filter.** Search matches project names, ignoring case. The due date filter offers overdue, due in the next 7 or 30 days, and no due date.
+- **Filters are kept in the URL** (e.g. `?status=In+progress&dueDate=overdue`), so they survive opening a project and pressing back, and a filtered view can be shared as a link.
+- **Due date pills.** These show "Due in 5 days", "Due tomorrow", "Due today" or "4 days overdue", coloured grey, amber or red by urgency. Completed projects and projects without a due date show no pill.
+- **Project details.**
+  - The card takes its status colour.
+  - Dates are formatted for reading (e.g. "24 November 2026").
+  - Edit and delete are icon buttons.
+- **Edit a project.** The edit button swaps the details for the same form, pre-filled, with Save and Cancel. Cancel throws away the changes.
+- **Status actions.**
+  - Not-started projects have a **Start project** button.
+  - In-progress projects have **Mark as complete** (the bonus task). It shows an animated confirmation and an **Undo** button.
 - **Delete a project.** Asks for confirmation first, then returns to the list.
-- **Mock data.** The app starts with four sample projects so the list and details pages have content straight away.
+- **Mock data.** Twelve sample projects cover every case: overdue, due today, due tomorrow, due soon, due in months, complete, and no due date.
+- **Accessibility.**
+  - Every input has a label.
+  - Icon buttons have `aria-label`s.
+  - Selected status tiles use `aria-pressed`.
+  - Keyboard users get a visible green focus ring (`focus-visible`).
 
 ### Validation
 
@@ -89,8 +107,21 @@ Errors appear under each field. The same validation runs when creating and when 
 - **The edit form reuses `ProjectForm`.** I first implemented a separate draft state in the details page. I then made the existing form take `initialValues`, `submitLabel` and an optional `onCancel`, so creating and editing share one set of fields and one validation path.
 - **Edit mode is tied to a project id.** The details page stores *which* project is being edited, not a plain true/false. Moving to another project (for example with the browser's back button) automatically leaves edit mode.
 - **Updates create new arrays.** Updating uses `.map()` to replace only the edited project, so React sees new state and re-renders.
-- **Dates are parsed as local time.** `formatDate` builds the `Date` from its year, month and day parts `new Date("YYYY-MM-DD")` 
+- **Logic separated in utils.** Filtering, sorting, due date labels and date formatting are plain functions in `src/utils/`, separate from the components. The date-based ones take an optional `today` parameter, so they can be tested with a fixed date.
+- **Status filter moved from a dropdown to tiles.** The status `<select>` was replaced by clickable count tiles, so filtering takes one click instead of two and the counts are visible at a glance.
+- **Stacked sections instead of columns.** I considered kanban-style columns, but chose stacked sections so the cards keep a comfortable width.
+- **One source for status order and colours.**
+  - `STATUS_DISPLAY_ORDER` drives both the sorting and the section order.
+  - `src/styles/statusStyles.ts` holds the colours for each status, shared by the list and details pages.
+  - Both are typed as `Record<ProjectStatus, …>`, so adding a status without colours is a type error.
+- **Sorting copies the array first.** `.sort()` changes an array in place, so `sortProjects` sorts a copy and never modifies props.
+- **The Manrope font from the Tailwind config is now applied.** It was defined in the config but never loaded or used.
+- **Mark as complete has Undo.** The details page remembers which project was just completed, the same pattern as edit mode, so Undo only appears straight after completing.
 
-### Possible next steps
+### UI screenshots
 
--
+| Before | After |
+|---|---|
+| ![Filters before](public/ui_screenshots/filters%20before.png) | ![List page after](public/ui_screenshots/list%20page%20after%20ui%20branch.png) |
+| ![Details before](public/ui_screenshots/details%20before.png) | ![Details after](public/ui_screenshots/details%20after.png) |
+
